@@ -49,6 +49,34 @@ export interface TeamMember {
   utilization: number;
 }
 
+export interface Deliverable {
+  id: string;
+  name: string;
+  phase: Phase;
+  status: 'pending' | 'in-progress' | 'review' | 'approved' | 'locked';
+  assignee: string;
+  revisions: Revision[];
+  maxRevisions: number;
+}
+
+export interface Revision {
+  id: string;
+  version: number;
+  uploadedBy: string;
+  uploadedAt: string;
+  fileUrl: string;
+  comments: RevisionComment[];
+  status: 'pending-review' | 'approved' | 'changes-requested';
+}
+
+export interface RevisionComment {
+  id: string;
+  author: string;
+  text: string;
+  timestamp: string;
+  timecode?: string;
+}
+
 export interface Invoice {
   id: string;
   projectName: string;
@@ -57,6 +85,32 @@ export interface Invoice {
   status: 'paid' | 'pending' | 'overdue';
   dueDate: string;
   issuedDate: string;
+}
+
+export interface PhaseDetail {
+  phase: Phase;
+  status: 'locked' | 'active' | 'completed';
+  startDate?: string;
+  endDate?: string;
+  completedDate?: string;
+  deliverables: Deliverable[];
+}
+
+export interface ProjectDetail extends Project {
+  description: string;
+  phases: PhaseDetail[];
+  totalInvoiced: number;
+  totalPaid: number;
+  notes: string[];
+  ruleViolations: RuleViolation[];
+}
+
+export interface RuleViolation {
+  id: string;
+  rule: string;
+  severity: 'critical' | 'warning' | 'info';
+  message: string;
+  blocksProgress: boolean;
 }
 
 export const mockLeads: Lead[] = [
@@ -123,3 +177,100 @@ export const phaseLabels: Record<Phase, string> = {
   'review': 'Review',
   'delivery': 'Delivery',
 };
+
+// Detailed project data for the detail page
+export const mockProjectDetails: Record<string, ProjectDetail> = {
+  'P001': {
+    id: 'P001', name: 'Momentum Q1 Campaign', clientName: 'Momentum Agency', type: 'commercial', phase: 'post-production', budget: 28000, spent: 19500, progress: 72, deadline: '2026-02-20', status: 'on-track', teamMembers: ['Jordan', 'Maya', 'Chris'],
+    description: 'A multi-platform commercial campaign for Momentum Agency targeting Q1 product launches.',
+    totalInvoiced: 28000, totalPaid: 14000,
+    notes: ['Client prefers warm color grading', 'Talent confirmed for reshoot if needed'],
+    ruleViolations: [],
+    phases: [
+      { phase: 'pre-production', status: 'completed', startDate: '2026-01-05', endDate: '2026-01-15', completedDate: '2026-01-14', deliverables: [
+        { id: 'D001', name: 'Creative Brief', phase: 'pre-production', status: 'approved', assignee: 'Maya', maxRevisions: 2, revisions: [
+          { id: 'R001', version: 1, uploadedBy: 'Maya', uploadedAt: '2026-01-10', fileUrl: '#', status: 'approved', comments: [{ id: 'RC1', author: 'Alex Rivera', text: 'Looks great, approved!', timestamp: '2026-01-11T10:00:00Z' }] }
+        ]},
+        { id: 'D002', name: 'Shot List & Storyboard', phase: 'pre-production', status: 'approved', assignee: 'Jordan', maxRevisions: 3, revisions: [
+          { id: 'R002', version: 1, uploadedBy: 'Jordan', uploadedAt: '2026-01-12', fileUrl: '#', status: 'changes-requested', comments: [{ id: 'RC2', author: 'Alex Rivera', text: 'Need more close-up shots in scene 3', timestamp: '2026-01-12T14:00:00Z' }] },
+          { id: 'R003', version: 2, uploadedBy: 'Jordan', uploadedAt: '2026-01-14', fileUrl: '#', status: 'approved', comments: [{ id: 'RC3', author: 'Alex Rivera', text: 'Perfect, approved', timestamp: '2026-01-14T09:00:00Z' }] }
+        ]}
+      ]},
+      { phase: 'production', status: 'completed', startDate: '2026-01-16', endDate: '2026-01-28', completedDate: '2026-01-27', deliverables: [
+        { id: 'D003', name: 'Raw Footage', phase: 'production', status: 'approved', assignee: 'Sam', maxRevisions: 1, revisions: [
+          { id: 'R004', version: 1, uploadedBy: 'Sam', uploadedAt: '2026-01-27', fileUrl: '#', status: 'approved', comments: [] }
+        ]}
+      ]},
+      { phase: 'post-production', status: 'active', startDate: '2026-01-29', endDate: '2026-02-14', deliverables: [
+        { id: 'D004', name: 'Rough Cut', phase: 'post-production', status: 'review', assignee: 'Chris', maxRevisions: 3, revisions: [
+          { id: 'R005', version: 1, uploadedBy: 'Chris', uploadedAt: '2026-02-03', fileUrl: '#', status: 'changes-requested', comments: [{ id: 'RC4', author: 'Alex Rivera', text: 'Pacing in the intro is too slow, tighten the first 10 seconds', timestamp: '2026-02-04T11:30:00Z', timecode: '00:00:05' }] },
+          { id: 'R006', version: 2, uploadedBy: 'Chris', uploadedAt: '2026-02-06', fileUrl: '#', status: 'pending-review', comments: [] }
+        ]},
+        { id: 'D005', name: 'Color Graded Final', phase: 'post-production', status: 'pending', assignee: 'Chris', maxRevisions: 2, revisions: [] },
+        { id: 'D006', name: 'Sound Mix', phase: 'post-production', status: 'pending', assignee: 'Alex', maxRevisions: 2, revisions: [] }
+      ]},
+      { phase: 'review', status: 'locked', deliverables: [
+        { id: 'D007', name: 'Final Review Package', phase: 'review', status: 'pending', assignee: 'Maya', maxRevisions: 2, revisions: [] }
+      ]},
+      { phase: 'delivery', status: 'locked', deliverables: [
+        { id: 'D008', name: 'Final Deliverables Package', phase: 'delivery', status: 'pending', assignee: 'Maya', maxRevisions: 1, revisions: [] }
+      ]}
+    ]
+  },
+  'P002': {
+    id: 'P002', name: 'Craft Studios Brand Film', clientName: 'Craft Studios', type: 'brand-film', phase: 'production', budget: 42000, spent: 25000, progress: 55, deadline: '2026-03-01', status: 'at-risk', teamMembers: ['Jordan', 'Sam', 'Alex'],
+    description: 'A cinematic brand film showcasing Craft Studios\' creative process and team culture.',
+    totalInvoiced: 42000, totalPaid: 21000,
+    notes: ['Director wants handheld feel', 'B-roll needed for office scenes'],
+    ruleViolations: [
+      { id: 'RV1', rule: 'Warn for unprofitable projects', severity: 'warning', message: 'Project costs at 60% of budget with only 55% progress — risk of exceeding budget.', blocksProgress: false },
+      { id: 'RV2', rule: 'Overdue invoice', severity: 'critical', message: 'Invoice INV-004 ($21,000) is overdue by 2 days. Delivery will be blocked until payment.', blocksProgress: true }
+    ],
+    phases: [
+      { phase: 'pre-production', status: 'completed', startDate: '2026-01-10', endDate: '2026-01-25', completedDate: '2026-01-24', deliverables: [
+        { id: 'D010', name: 'Creative Brief', phase: 'pre-production', status: 'approved', assignee: 'Jordan', maxRevisions: 2, revisions: [
+          { id: 'R010', version: 1, uploadedBy: 'Jordan', uploadedAt: '2026-01-15', fileUrl: '#', status: 'approved', comments: [] }
+        ]},
+        { id: 'D011', name: 'Treatment & Mood Board', phase: 'pre-production', status: 'approved', assignee: 'Jordan', maxRevisions: 3, revisions: [
+          { id: 'R011', version: 1, uploadedBy: 'Jordan', uploadedAt: '2026-01-20', fileUrl: '#', status: 'approved', comments: [] }
+        ]}
+      ]},
+      { phase: 'production', status: 'active', startDate: '2026-01-26', endDate: '2026-02-10', deliverables: [
+        { id: 'D012', name: 'Interview Footage', phase: 'production', status: 'in-progress', assignee: 'Sam', maxRevisions: 1, revisions: [] },
+        { id: 'D013', name: 'B-Roll Footage', phase: 'production', status: 'pending', assignee: 'Sam', maxRevisions: 1, revisions: [] }
+      ]},
+      { phase: 'post-production', status: 'locked', deliverables: [
+        { id: 'D014', name: 'Assembly Edit', phase: 'post-production', status: 'pending', assignee: 'Alex', maxRevisions: 3, revisions: [] },
+        { id: 'D015', name: 'Final Cut', phase: 'post-production', status: 'pending', assignee: 'Alex', maxRevisions: 2, revisions: [] }
+      ]},
+      { phase: 'review', status: 'locked', deliverables: [
+        { id: 'D016', name: 'Client Review Package', phase: 'review', status: 'pending', assignee: 'Jordan', maxRevisions: 2, revisions: [] }
+      ]},
+      { phase: 'delivery', status: 'locked', deliverables: [
+        { id: 'D017', name: 'Final Deliverables', phase: 'delivery', status: 'pending', assignee: 'Jordan', maxRevisions: 1, revisions: [] }
+      ]}
+    ]
+  }
+};
+
+export function getProjectDetail(id: string): ProjectDetail | undefined {
+  if (mockProjectDetails[id]) return mockProjectDetails[id];
+  // Fallback: generate a basic detail from the project list
+  const project = mockProjects.find(p => p.id === id);
+  if (!project) return undefined;
+  const typeConf = projectTypeConfig[project.type];
+  const currentPhaseIdx = typeConf.defaultPhases.indexOf(project.phase);
+  return {
+    ...project,
+    description: `${typeConf.label} project for ${project.clientName}.`,
+    totalInvoiced: project.budget,
+    totalPaid: project.spent,
+    notes: [],
+    ruleViolations: [],
+    phases: typeConf.defaultPhases.map((p, i) => ({
+      phase: p,
+      status: i < currentPhaseIdx ? 'completed' as const : i === currentPhaseIdx ? 'active' as const : 'locked' as const,
+      deliverables: []
+    }))
+  };
+}

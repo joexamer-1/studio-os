@@ -2,6 +2,7 @@ import { mockProjects, phaseLabels, projectTypeConfig } from "@/lib/mock-data";
 import { Badge } from "@/components/ui/badge";
 import { Progress } from "@/components/ui/progress";
 import { cn } from "@/lib/utils";
+import { useNavigate } from "react-router-dom";
 
 const statusStyles = {
   'on-track': 'bg-success/10 text-success border-success/20',
@@ -11,6 +12,8 @@ const statusStyles = {
 };
 
 export function ProjectList() {
+  const navigate = useNavigate();
+
   return (
     <div className="space-y-3">
       {mockProjects.map((project) => {
@@ -18,6 +21,7 @@ export function ProjectList() {
         return (
           <div
             key={project.id}
+            onClick={() => navigate(`/projects/${project.id}`)}
             className="glass rounded-xl p-4 hover:border-primary/30 transition-all duration-200 cursor-pointer group"
           >
             <div className="flex items-center justify-between mb-3">
